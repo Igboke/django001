@@ -11,16 +11,16 @@
     <link rel="stylesheet" type="text/css" href="{% static 'blog/main.css' %}">
 
     {% if title %}
-        <title>Django_Blog - {{ title }}</title>
+        <title>Daniel_Blog - {{ title }}</title>
     {% else %}
-        <title> Django-Blog </title>
+        <title> Daniel Blog </title>
     {% endif %}
 </head>
 <body>
     <header class="site-header">
         <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
             <div class="container">
-                <a class="navbar-brand mr-4" href="{% url 'blog-home' %}">Django Blog</a>
+                <a class="navbar-brand mr-4" href="{% url 'blog-home' %}">Daniel Blog</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
                 </button>
@@ -31,9 +31,19 @@
                     </div>
                     <!-- Navbar Right Side -->
                     <div class="navbar-nav">
-                        <a class="nav-item nav-link" href="#">Login</a>
-                        <a class="nav-item nav-link" href="#">Register</a>
+                        {% if not user.is_authenticated %}
+                            <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
+                            <a class="nav-item nav-link" href="{% url 'register' %}">Register</a>
+                        {% else %}
+                            <a class="nav-item nav-link" href="{% url 'profile' %}">Profile</a>
                     </div>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-primary" style="border: #5f7000; outline: #5f7000; background-color: #5f7000;" type="submit">
+                            Logout
+                        </button>
+                    </form>
+                        {% endif %}
                 </div>
             </div>
         </nav>
