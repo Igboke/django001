@@ -44,4 +44,8 @@ class Post(models.Model):
             self.slug = slugify(self.title)
         super().save(*args,**kwargs)
 
+class Comments(models.Model):
+    # comment model
+    pass
+
 
