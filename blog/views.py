@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from .models import Post
 from .forms import EmailPostForms
+from django.core.mail import send_mail
 
 def home(requests):
     context = {
@@ -13,14 +14,21 @@ def home(requests):
     return render(requests,'blog/home.html',context)
 
 def post_share(requests,post_id):
-    post = get_object_or_404(Post,id=post_id,)
-    if requests.METHOD == 'post':
-        form = EmailPostForms(requests.post)
+    post = get_object_or_404(Post,id=post_id)
+    sent = False
+    if requests.method == 'POST':
+        form = EmailPostForms(requests.POST)
         if form.is_valid():
             cd = form.cleaned_data
+            post_url = requests.build_absolute_uri(post.get_absolute_url())
+            subjects = (f'{cd['name']}  {cd['email']} ' 
+                        f'recommends you to read {post.title}')
+            messages = f'Read {post.title} at {post_url}\n\n {cd['name']} \n\n Comment: {cd['comment']}'
+            send_mail(message=messages,subject=subjects,recipient_list=[cd['to']],from_email=None)
+            sent=True
     else:
         form = EmailPostForms()
-    return render(requests,'blog/post_share.html',{'post':post,'form':form})
+    return render(requests,'blog/post_share.html',{'post':post,'form':form,'sent':sent})
 
 class PostListView(ListView):
     # model = Post
@@ -68,7 +76,7 @@ class PostCreateView(LoginRequiredMixin,CreateView):
     def get_success_url(self):
         if not self.object:
             raise ValueError('Object not found')
-        return reverse ('blog:post-detail',kwargs={'id':self.object.id})
+        return reverse('blog:blog-home')
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin,UpdateView):
     model = Post
