@@ -12,5 +12,6 @@ urlpatterns = [
     path('post/<int:year>/<int:month>/<int:day>/<slug:post>/',views.post_detail_view,name='post-detail'),
     path('post/<int:pk>/update/',PostUpdateView.as_view(),name='post-update'),
     path('post/<int:pk>/delete/',PostDeleteView.as_view(),name='post-delete'),
-    path('post/new/',PostCreateView.as_view(), name='post-create')
+    path('post/new/',PostCreateView.as_view(), name='post-create'),
+    path('post/<int:post_id>/share/',views.post_share,name='post-share')
 ]
