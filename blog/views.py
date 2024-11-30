@@ -3,8 +3,9 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 from .models import Post
-from .forms import EmailPostForms
+from .forms import EmailPostForms, CommentForm
 from django.core.mail import send_mail
 
 def home(requests):
@@ -12,6 +13,17 @@ def home(requests):
         'posts':Post.objects.all()
         }
     return render(requests,'blog/home.html',context)
+
+@require_POST
+def post_comment(requests,post_id):
+    post = get_object_or_404(Post,id=post_id)
+    comment = None
+    form = CommentForm(data=requests.POST)
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.post = post
+        comment.save()
+    return render(requests,'blog/comment.html',{'post':post,'form':form,'comment':comment})
 
 def post_share(requests,post_id):
     post = get_object_or_404(Post,id=post_id)
@@ -53,7 +65,9 @@ class UserPostListView(ListView):
 
 def post_detail_view(requests,year,month,day,post):
     post = get_object_or_404(Post,status=Post.Status.DRAFT,slug=post, date_posted__year=year, date_posted__month=month,date_posted__day=day)
-    return render(requests,'blog/post_detail.html',context={'post':post})
+    comments = post.comments.filter(active=True)
+    form = CommentForm()
+    return render(requests,'blog/post_detail.html',context={'post':post,'comments':comments,'form':form})
 
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post

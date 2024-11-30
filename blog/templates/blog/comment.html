@@ -1,0 +1,12 @@
+{% extends 'blog/base.html'%}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="content-section">
+        {% if comment %}
+            <h3>Your Comment has been added</h3>
+            <a href="{{ post.get_absolute_url }}">Return to Post</a>
+        {% else %}
+            {% include 'blog/comment_form.html' %}
+        {% endif %}
+    </div>
+{% endblock content %}

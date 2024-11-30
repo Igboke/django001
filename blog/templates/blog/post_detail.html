@@ -1,21 +1,51 @@
 {% extends "blog/base.html" %}
+
 {% block content %}
-    <article class="media content-section">
-        <img src="{{ post.author.profile.image.url }}" class="rounded-circle article-img">
-        <div class="media-body">
-            <div class="article-metadata">
+<article class="media content-section">
+    <img src="{{ post.author.profile.image.url }}" alt="Profile picture of {{ post.author }}" class="rounded-circle article-img">
+    <div class="media-body">
+        <div class="article-metadata">
             <a class="mr-2" href="#">{{ post.author }}</a>
-            <small class="text-muted">{{ post.date_posted }}</small>
-            </div>
-            <h2 class="article-title">{{ post.title }}</h2>
-            <p class="article-content">{{ post.content }}</p>
-            {% if post.author == user %}
-                <div>
-                    <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'blog:post-update' post.id %}">Update Post</a>
-                    <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'blog:post-delete' post.id %}">Delete Post</a>
-                    <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'blog:post-share' post.id %}">Share Post</a>
-                </div>
-            {% endif %}
+            <small class="text-muted">{{ post.date_posted|date:"F j, Y, g:i a" }}</small>
         </div>
-    </article>
+        <h2 class="article-title">{{ post.title }}</h2>
+        <p class="article-content">{{ post.content|linebreaks }}</p>
+
+        {% if post.author == user %}
+        <div class="d-flex gap-2">
+            <a class="btn btn-secondary btn-sm" href="{% url 'blog:post-update' post.id %}">Update Post</a>
+            <a class="btn btn-danger btn-sm" href="{% url 'blog:post-delete' post.id %}">Delete Post</a>
+            <a class="btn btn-secondary btn-sm" href="{% url 'blog:post-share' post.id %}">Share Post</a>
+        </div>
+        {% endif %}
+    </div>
+</article>
+
+<div class="container mt-5">
+    {% with comments.count as total_comments %}
+    <h3 class="mb-4">
+        {{ total_comments }} comment{{ total_comments|pluralize }}
+    </h3>
+    {% endwith %}
+</div>
+
+<div class="content-section">
+    <div class="media-body">
+        {% for comment in comments %}
+        <div class="comment">
+            <p>
+                <strong>Comment {{ forloop.counter }} by {{ comment.name }}</strong>
+                <small class="text-muted">{{ comment.created|date:"F j, Y, g:i a" }}</small>
+            </p>
+            <p>{{ comment.body|linebreaks }}</p>
+        </div>
+        {% empty %}
+        <p>There are no comments yet. Be the first to comment!</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div>
+    {% include 'blog/comment_form.html' %}
+</div>
 {% endblock content %}
